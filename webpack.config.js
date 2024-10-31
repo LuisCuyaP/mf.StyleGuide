@@ -1,6 +1,6 @@
 const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-ts");
-const { BaseHrefWebpackPlugin } = require("base-href-webpack-plugin");
+const path = require("path");
 
 module.exports = (webpackConfigEnv, argv) => {
   const defaultConfig = singleSpaDefaults({
@@ -11,23 +11,24 @@ module.exports = (webpackConfigEnv, argv) => {
   });
 
   return merge(defaultConfig, {
-    // No añadimos reglas extras para CSS aquí
+    entry: {
+      main: path.resolve(__dirname, "src/myorg-MyOrgStyle.ts"),
+    },
+    output: {
+      filename: "myorg-MyOrgStyle.js",
+      path: path.resolve(__dirname, "dist"),
+      libraryTarget: "system",
+    },
     module: {
       rules: [
-        // Regla para otros archivos como imágenes SVG
         {
-          test: /\.(png|jpe?g|gif|svg)$/i,
-          type: "asset/resource",
-          generator: {
-            filename: "img/[name][ext][query]",
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
           },
         },
       ],
     },
-    plugins: [
-      new BaseHrefWebpackPlugin({
-        baseHref: "/styleguide/",
-      }),
-    ],
   });
 };
